@@ -1,1 +1,2 @@
-#ADD YOUR OWN YOUTUBE COOKIES
+# Netscape HTTP Cookie File
+# This is a generated file! Do not edit.
