@@ -36,7 +36,7 @@ class Config(object):
     LOGGER = logging
     OWNER_ID = 8304706556
     SESSION_NAME = "UploaderXNTBot"
-    UPDATES_CHANNEL = ""
+    UPDATES_CHANNEL = "-1003280087333"
 
     TG_MIN_FILE_SIZE = 2194304000
     BOT_USERNAME = "@Urluploader_z_bot"
