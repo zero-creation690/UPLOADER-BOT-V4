@@ -16,9 +16,9 @@ class Config(object):
     API_HASH = "d702614912f1ad370a0d18786002adbf"
     
     DOWNLOAD_LOCATION = "./DOWNLOADS"
-    MAX_FILE_SIZE = 2194304000
-    TG_MAX_FILE_SIZE = 2194304000
-    FREE_USER_MAX_FILE_SIZE = 2194304000
+    MAX_FILE_SIZE = 4294967296  # 4GB in bytes (4 * 1024 * 1024 * 1024)
+    TG_MAX_FILE_SIZE = 4294967296  # 4GB in bytes
+    FREE_USER_MAX_FILE_SIZE = 4294967296  # 4GB in bytes
     CHUNK_SIZE = 128
     DEF_THUMB_NAIL_VID_S = "https://placehold.it/90x90"
     HTTP_PROXY = ""
@@ -38,7 +38,7 @@ class Config(object):
     SESSION_NAME = "UploaderXNTBot"
     UPDATES_CHANNEL = "-1003280087333"
 
-    TG_MIN_FILE_SIZE = 2194304000
+    TG_MIN_FILE_SIZE = 4294967296  # 4GB in bytes
     BOT_USERNAME = "@Urluploader_z_bot"
     ADL_BOT_RQ = {}
 
