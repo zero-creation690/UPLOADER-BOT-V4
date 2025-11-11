@@ -4,20 +4,23 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from plugins.script import Translation
 from pyrogram import enums
 
-# Configuration - Set to False to disable progress bar
+# Configuration
 SHOW_PROGRESS = True
-UPDATE_INTERVAL = 5  # Update every 5 seconds (faster updates)
+UPDATE_INTERVAL = 5  # Update every 5 seconds
 
 
 async def progress_for_pyrogram(current, total, ud_type, message, start):
+    """
+    Progress function that works for both download and upload
+    """
     if not SHOW_PROGRESS:
         return
     
     now = time.time()
     diff = now - start
     
-    # Faster updates with configurable interval - also update at start and end
-    if diff == 0 or round(diff % UPDATE_INTERVAL) == 0 or current == total:
+    # Update at start, intervals, or completion
+    if diff < 1 or round(diff % UPDATE_INTERVAL) == 0 or current == total:
         percentage = current * 100 / total
         speed = current / diff if diff > 0 else 0
         elapsed_time = round(diff) * 1000
@@ -40,16 +43,29 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
         )
         
         try:
-            await message.edit(
-                text=Translation.PROGRES.format(ud_type, tmp),
-                parse_mode=enums.ParseMode.MARKDOWN,
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton('⛔ Cancel', callback_data=f"cancel_download+{message.id}")]
-                ])
-            )
+            # Try to edit as text first (for downloads), then as caption (for uploads)
+            text_content = Translation.PROGRES.format(ud_type, tmp)
+            
+            try:
+                # For regular messages (downloads)
+                await message.edit_text(
+                    text=text_content,
+                    parse_mode=enums.ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton('⛔ Cancel', callback_data=f"cancel_download+{message.id}")]
+                    ])
+                )
+            except AttributeError:
+                # For media messages (uploads) - use edit_caption
+                await message.edit_caption(
+                    caption=text_content,
+                    parse_mode=enums.ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton('⛔ Cancel', callback_data=f"cancel_download+{message.id}")]
+                    ])
+                )
         except Exception as e:
-            # Log the error for debugging
-            print(f"Progress update error: {e}")
+            # Silent fail for flood wait or other errors
             pass
 
 
@@ -71,6 +87,9 @@ def humanbytes(size):
 
 def TimeFormatter(milliseconds: int) -> str:
     """Format milliseconds to human readable time"""
+    if not milliseconds:
+        return "0s"
+    
     seconds, milliseconds = divmod(int(milliseconds), 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
@@ -91,7 +110,7 @@ def TimeFormatter(milliseconds: int) -> str:
     return ", ".join(parts) if parts else "0s"
 
 
-# Toggle function to enable/disable progress bar
+# Toggle and configuration functions
 def toggle_progress(show: bool):
     """Enable or disable progress bar display"""
     global SHOW_PROGRESS
@@ -99,9 +118,8 @@ def toggle_progress(show: bool):
     return f"Progress bar {'enabled' if show else 'disabled'}"
 
 
-# Set custom update interval (in seconds)
 def set_update_interval(seconds: int):
-    """Set how often the progress bar updates"""
+    """Set how often the progress bar updates (minimum 1 second)"""
     global UPDATE_INTERVAL
-    UPDATE_INTERVAL = max(1, seconds)  # Minimum 1 second
+    UPDATE_INTERVAL = max(1, seconds)
     return f"Update interval set to {UPDATE_INTERVAL} seconds"
